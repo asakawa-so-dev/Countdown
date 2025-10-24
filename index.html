@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>営業日カウントダウン（祝日対応）</title>
+  <style>
+    body {
+      font-family: "Inter", "Noto Sans JP", sans-serif;
+      background: #f8f8f8;
+      color: #222;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    h1 {
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+    }
+    #days {
+      font-size: 3rem;
+      font-weight: bold;
+    }
+    .sub {
+      font-size: 0.9rem;
+      color: #666;
+      margin-top: 0.5rem;
+    }
+    .loading {
+      font-size: 1rem;
+      color: #999;
+    }
+  </style>
+</head>
+<body>
+  <h1>今年の残り営業日</h1>
+  <div id="days" class="loading">読み込み中...</div>
+  <div class="sub" id="date"></div>
+
+  <script>
+    const HOLIDAY_URL =
+      "https://calendar.google.com/calendar/ical/ja.japanese%23holiday%40group.v.calendar.google.com/public/basic.ics";
+
+    async function fetchHolidays() {
+      const res = await fetch(HOLIDAY_URL);
+      const text = await res.text();
+      const holidays = [];
+      const lines = text.split("\n");
+      let currentDate = null;
+
+      for (let line of lines) {
+        if (line.startsWith("DTSTART;")) {
+          const match = line.match(/DTSTART;VALUE=DATE:(\d{8})/);
+          if (match) {
+            const dateStr = match[1];
+            const year = dateStr.slice(0, 4);
+            const month = dateStr.slice(4, 6);
+            const day = dateStr.slice(6, 8);
+            currentDate = new Date(`${year}-${month}-${day}`);
+            holidays.push(currentDate.toISOString().split("T")[0]);
+          }
+        }
+      }
+      return holidays;
+    }
+
+    function isBusinessDay(date, holidayList) {
+      const day = date.getDay();
+      const iso = date.toISOString().split("T")[0];
+      return day !== 0 && day !== 6 && !holidayList.includes(iso);
+    }
+
+    async function countBusinessDaysUntilEndOfYear() {
+      const holidays = await fetchHolidays();
+      const today = new Date();
+      const endOfYear = new Date(today.getFullYear(), 11, 31);
+      let count = 0;
+      let current = new Date(today);
+      current.setDate(current.getDate() + 1);
+
+      while (current <= endOfYear) {
+        if (isBusinessDay(current, holidays)) count++;
+        current.setDate(current.getDate() + 1);
+      }
+      return count;
+    }
+
+    countBusinessDaysUntilEndOfYear().then((count) => {
+      document.getElementById("days").textContent = count;
+      document.getElementById("days").classList.remove("loading");
+      document.getElementById("date").textContent =
+        `更新日: ${new Date().toLocaleDateString("ja-JP")}`;
+    });
+  </script>
+</body>
+</html>
