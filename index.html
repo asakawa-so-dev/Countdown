@@ -5,149 +5,61 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>2025 残り営業日ウィジェット</title>
   <style>
-    :root {
-      --bg: #ffffff;
-      --fg: #111111;
-      --muted: #6b7280;
-      --accent: #ef4444;
-      --card: #f8fafc;
-      --border: #e5e7eb;
-    }
-    * { box-sizing: border-box; }
-    html, body { height: 100%; }
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--fg);
+    :root { --bg:#fff; --fg:#111; --muted:#6b7280; --card:#f8fafc; --border:#e5e7eb; }
+    *{ box-sizing:border-box }
+    html,body{ height:100% }
+    body{
+      margin:0; background:var(--bg); color:var(--fg);
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans JP", "Apple Color Emoji", "Segoe UI Emoji";
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
+      -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
     }
-    .container {
-      min-height: 100vh;
-      display: grid;
-      place-items: center;
-      padding: 20px;
+    .container{ min-height:100vh; display:grid; place-items:center; padding:20px; }
+    .widget{
+      width:min(720px,96vw); background:linear-gradient(180deg,#fff,#fff),var(--card);
+      border:1px solid var(--border); border-radius:24px; padding:28px; position:relative; overflow:hidden;
+      box-shadow:0 10px 20px rgba(0,0,0,.05);
     }
-    .widget {
-      width: min(720px, 96vw);
-      background: linear-gradient(180deg, #fff, #fff), var(--card);
-      border: 1px solid var(--border);
-      border-radius: 24px;
-      padding: 28px;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.05);
-      position: relative;
-      overflow: hidden;
+    .widget::after{
+      content:""; position:absolute; top:-40px; right:-40px; width:180px; height:180px;
+      background:radial-gradient(closest-side, rgba(239,68,68,.18), rgba(239,68,68,0)); filter:blur(6px); pointer-events:none;
     }
-    .widget::after {
-      content: "";
-      position: absolute;
-      top: -40px; right: -40px;
-      width: 180px; height: 180px;
-      background: radial-gradient(closest-side, rgba(239,68,68,0.18), rgba(239,68,68,0));
-      filter: blur(6px);
-      pointer-events: none;
+    .header{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:10px; }
+    .title{ font-size:clamp(16px,2.8vw,20px); font-weight:700; display:flex; align-items:center; gap:10px; }
+    .pill{
+      display:inline-flex; align-items:center; gap:8px; background:#fee2e2; color:#991b1b;
+      border:1px solid #fecaca; border-radius:999px; padding:4px 10px; font-size:12px; font-weight:600;
     }
-    .header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 10px;
-    }
-    .title {
-      font-size: clamp(16px, 2.8vw, 20px);
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: #fee2e2;
-      color: #991b1b;
-      border: 1px solid #fecaca;
-      border-radius: 999px;
-      padding: 4px 10px;
-      font-size: 12px;
-      font-weight: 600;
-    }
-    .main {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 18px;
-    }
-    .count {
-      display: grid;
-      grid-template-columns: auto 1fr;
-      align-items: end;
-      gap: 18px;
-    }
-    .days {
-      font-size: clamp(56px, 12vw, 108px);
-      font-weight: 900;
-      line-height: 0.9;
-      letter-spacing: -0.02em;
-      position: relative;
-      animation: urgency 2.6s infinite ease-in-out;
-    }
-    @keyframes urgency {
-      0%, 45%, 47%, 100% { transform: translateY(0); }
-      46% { transform: translateY(-1px); }
-    }
-    .label .big { font-size: clamp(18px, 2.6vw, 24px); font-weight: 800; }
-    .label .sub { font-size: 13px; color: var(--muted); }
-    .progress {
-      width: 100%;
-      height: 12px;
-      border-radius: 999px;
-      background: #f1f5f9;
-      border: 1px solid var(--border);
-      overflow: hidden;
-      position: relative;
-    }
-    .bar { height: 100%; width: 0; background: linear-gradient(90deg, #ef4444, #dc2626); transition: width 1s cubic-bezier(.4,0,.2,1); }
-    .progress-meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-top: 6px; }
-    .controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-    .toggle {
-      appearance: none;
-      width: 46px; height: 26px;
-      border-radius: 999px;
-      position: relative;
-      background: #e5e7eb;
-      border: 1px solid var(--border);
-      transition: background .3s ease;
-      cursor: pointer;
-    }
-    .toggle:checked { background: #fecaca; border-color: #fca5a5; }
-    .toggle::after {
-      content: "";
-      position: absolute; top: 50%; left: 2px; transform: translateY(-50%);
-      width: 20px; height: 20px;
-      border-radius: 50%;
-      background: #fff;
-      border: 1px solid var(--border);
-      transition: left .3s ease;
-    }
-    .toggle:checked::after { left: 24px; }
-    .control-label { font-size: 12px; color: var(--muted); font-weight: 600; }
-    .list { margin-top: 6px; display: grid; gap: 8px; font-size: 13px; color: #374151; }
-    .date-item { display: flex; justify-content: space-between; padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; background: #fff; }
-    .footer { margin-top: 10px; display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: var(--muted); }
-    .deadline { font-weight: 700; color: #991b1b; }
+    .main{ display:grid; grid-template-columns:1fr; gap:18px; }
+    .count{ display:grid; grid-template-columns:auto 1fr; align-items:end; gap:18px; }
+    .days{ font-size:clamp(56px,12vw,108px); font-weight:900; line-height:.9; letter-spacing:-.02em; animation:urgency 2.6s infinite ease-in-out; }
+    @keyframes urgency{ 0%,45%,47%,100%{transform:translateY(0)} 46%{transform:translateY(-1px)} }
+    .label .big{ font-size:clamp(18px,2.6vw,24px); font-weight:800; }
+    .label .sub{ font-size:13px; color:var(--muted); }
+    .progress{ width:100%; height:12px; border-radius:999px; background:#f1f5f9; border:1px solid var(--border); overflow:hidden; }
+    .bar{ height:100%; width:0; background:linear-gradient(90deg,#ef4444,#dc2626); transition:width 1s cubic-bezier(.4,0,.2,1); }
+    .progress-meta{ display:flex; justify-content:space-between; font-size:12px; color:var(--muted); margin-top:6px; }
+    .controls{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+    .toggle{ appearance:none; width:46px; height:26px; border-radius:999px; position:relative; background:#e5e7eb; border:1px solid var(--border); transition:background .3s; cursor:pointer; }
+    .toggle:checked{ background:#fecaca; border-color:#fca5a5; }
+    .toggle::after{ content:""; position:absolute; top:50%; left:2px; transform:translateY(-50%); width:20px; height:20px; border-radius:50%; background:#fff; border:1px solid var(--border); transition:left .3s; box-shadow:0 1px 2px rgba(0,0,0,.06); }
+    .toggle:checked::after{ left:24px; }
+    .control-label{ font-size:12px; color:var(--muted); font-weight:600; }
+    .list{ margin-top:6px; display:grid; gap:8px; font-size:13px; color:#374151; }
+    .date-item{ display:flex; justify-content:space-between; padding:10px 12px; border:1px solid var(--border); border-radius:12px; background:#fff; }
+    .footer{ margin-top:10px; display:flex; align-items:center; justify-content:space-between; font-size:12px; color:var(--muted); }
+    .deadline{ font-weight:700; color:#991b1b; }
+    @media (min-width:680px){ .main{ grid-template-columns:1.4fr 1fr; align-items:center } .list{ margin-top:0 } }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="widget">
+    <div class="widget" role="group" aria-label="2025年の残り営業日ウィジェット">
       <div class="header">
         <div class="title">
           <span>2025年・残り営業日</span>
           <span class="pill">最終営業日: <span id="lastBiz" class="deadline">2025/12/30</span></span>
         </div>
-        <div class="controls">
+        <div class="controls" aria-label="設定">
           <label class="control-label" for="includeToday">今日を含める</label>
           <input id="includeToday" class="toggle" type="checkbox" />
         </div>
@@ -162,10 +74,128 @@
               <div class="sub" id="rangeText">2025年1月1日〜12月30日の営業日進捗</div>
             </div>
           </div>
-          <div class="progress">
-            <div class="bar" id="progressBar"></div>
-          </div>
-          <div class="progress-meta">
-            <div>経過: <span id="elapsedBiz">--</span> 日</div>
-            <div>合計: <span id="totalBiz">--</span> 日</div>
-          </div>
+          <div class="progress" aria-label="進捗"><div class="bar" id="progressBar"></div></div>
+          <div class="progress-meta"><div>経過: <span id="elapsedBiz">--</span> 日</div><div>合計: <span id="totalBiz">--</span> 日</div></div>
+        </div>
+        <div>
+          <div class="sub" style="margin-bottom:6px; font-weight:700;">次の営業日（5件）</div>
+          <div class="list" id="upcoming"></div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <div>土日・祝祭日を除外。<span class="deadline">12/30</span>を最終営業日として計算。</div>
+        <div id="todayInfo"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ---- 日付ユーティリティ（ローカル0時に正規化） ----
+    const d0 = (y, m, d) => new Date(y, m - 1, d);
+    const atMidnight = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const fmt = (d) => d.toLocaleDateString('ja-JP', { year:'numeric', month:'2-digit', day:'2-digit', weekday:'short' });
+    const ymd = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+
+    // ---- 期間設定（ローカル日付で固定） ----
+    const YEAR_START = d0(2025, 1, 1);   // 【元ファイルの設定をローカル日付へ変更】:contentReference[oaicite:2]{index=2}
+    const CUT_OFF    = d0(2025,12,30);   // :contentReference[oaicite:3]{index=3}
+
+    // ---- 2025年の祝日（振替含む／ローカル日付） ----
+    const HOLIDAYS_2025 = new Set([
+      '2025-01-01','2025-01-13','2025-02-11','2025-02-23','2025-02-24',
+      '2025-03-20','2025-04-29','2025-05-03','2025-05-04','2025-05-05','2025-05-06',
+      '2025-07-21','2025-08-11','2025-09-15','2025-09-23','2025-10-13','2025-11-03','2025-11-23','2025-11-24'
+    ]); // 【祝日は元ファイル同等の網羅】:contentReference[oaicite:4]{index=4}
+
+    // ---- 判定 ----
+    const isWeekend   = (d) => [0,6].includes(d.getDay());
+    const isHoliday   = (d) => HOLIDAYS_2025.has(ymd(d));
+    const inRange     = (d) => d >= YEAR_START && d <= CUT_OFF;
+    const isBusinessDay = (d) => inRange(d) && !isWeekend(d) && !isHoliday(d);
+
+    function enumerateBusinessDays(start, end){
+      const out = [];
+      const cur = atMidnight(start);
+      const last = atMidnight(end);
+      while (cur <= last){
+        if (isBusinessDay(cur)) out.push(new Date(cur));
+        cur.setDate(cur.getDate()+1);
+      }
+      return out;
+    }
+
+    function compute(includeToday){
+      const now   = new Date();
+      const today = atMidnight(now);
+
+      const allBiz   = enumerateBusinessDays(YEAR_START, CUT_OFF);
+      const total    = allBiz.length;
+      const yesterday= new Date(today); yesterday.setDate(yesterday.getDate()-1);
+      const elapsed  = allBiz.filter(d => d <= yesterday).length;
+
+      // 今日が営業日かつ「含める」スイッチONのときだけ今日を起点にする【元ファイルのロジック修正】:contentReference[oaicite:5]{index=5}
+      let startCount = new Date(today);
+      if (!includeToday || !isBusinessDay(today)) startCount.setDate(startCount.getDate()+1);
+
+      const remainingBiz = enumerateBusinessDays(startCount, CUT_OFF);
+
+      // 次の営業日5件
+      const allFromToday = enumerateBusinessDays(today, CUT_OFF);
+      const nextList = (includeToday && isBusinessDay(today)) ? allFromToday.slice(0,5) : allFromToday.slice(1,6);
+
+      return { total, elapsed, remaining: remainingBiz.length, nextList, today };
+    }
+
+    // ---- UI結線 ----
+    const daysLeftEl     = document.getElementById('daysLeft');
+    const elapsedBizEl   = document.getElementById('elapsedBiz');
+    const totalBizEl     = document.getElementById('totalBiz');
+    const progressBarEl  = document.getElementById('progressBar');
+    const upcomingEl     = document.getElementById('upcoming');
+    const todayInfoEl    = document.getElementById('todayInfo');
+    const includeTodayEl = document.getElementById('includeToday');
+    const includeHint    = document.getElementById('includeHint');
+
+    function render(){
+      const includeToday = !!includeTodayEl.checked;
+      const { total, elapsed, remaining, nextList, today } = compute(includeToday);
+
+      daysLeftEl.textContent = Number.isFinite(remaining) ? remaining : 0;
+      includeHint.style.display = (includeToday && isBusinessDay(today)) ? 'inline' : 'none';
+
+      elapsedBizEl.textContent = Number.isFinite(elapsed) ? elapsed : 0;
+      totalBizEl.textContent   = Number.isFinite(total) ? total : 0;
+
+      const pct = (total > 0) ? Math.min(100, Math.max(0, (elapsed / total) * 100)) : 0;
+      progressBarEl.style.width = `${pct.toFixed(1)}%`;
+
+      // 次の営業日
+      if (nextList.length === 0){
+        upcomingEl.innerHTML = `<div class="date-item">今年の営業日は終了しました。おつかれさまでした。</div>`;
+      } else {
+        const base = atMidnight(new Date());
+        upcomingEl.innerHTML = nextList.map(d => {
+          const diff = Math.round((atMidnight(d) - base)/(1000*60*60*24));
+          return `<div class="date-item"><div>${fmt(d)}</div><div>${diff}日後</div></div>`;
+        }).join('');
+      }
+
+      const state = isBusinessDay(today) ? '本日は営業日' : '本日は休業日';
+      todayInfoEl.textContent = `${state}（${fmt(today)}）`;
+    }
+
+    // DOMが完成してから初期化（早期実行での未結線を回避）
+    document.addEventListener('DOMContentLoaded', () => {
+      includeTodayEl.checked = true;
+      includeTodayEl.addEventListener('change', render);
+      render();
+      // 毎正時の2秒以内に自動更新
+      setInterval(() => {
+        const now = new Date();
+        if (now.getMinutes() === 0 && now.getSeconds() < 2) render();
+      }, 1000);
+    });
+  </script>
+</body>
+</html>
